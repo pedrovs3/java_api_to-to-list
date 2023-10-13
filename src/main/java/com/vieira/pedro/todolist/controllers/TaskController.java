@@ -1,7 +1,6 @@
 package com.vieira.pedro.todolist.controllers;
 
 import com.vieira.pedro.todolist.models.TaskModel;
-import com.vieira.pedro.todolist.repository.IStatusRepository;
 import com.vieira.pedro.todolist.repository.ITaskRepository;
 import com.vieira.pedro.todolist.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,11 +50,20 @@ public class TaskController {
     )
     public ResponseEntity update(@RequestBody TaskModel taskModel, @PathVariable String id, HttpServletRequest request) {
         var task = this.taskRepository.findByStringId(id);
+        UUID idUser = (UUID) request.getAttribute("userId");
         if (task == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task not found");
         }
+        if (task.getUserId().equals(idUser)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
         Utils.copyNonNullProperties(taskModel, task);
 
-        return ResponseEntity.status(HttpStatus.OK).body(this.taskRepository.save(task));
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(this.taskRepository.save(task));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }
