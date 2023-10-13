@@ -54,7 +54,7 @@ public class TaskController {
         if (task == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task not found");
         }
-        if (task.getUserId().equals(idUser)) {
+        if (!task.getUserId().equals(idUser)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
